@@ -295,7 +295,7 @@ namespace TheSnake
             else if (snake.Score >= 6500) snake.MoveDelay = 30;
             else if (snake.Score >= 5000) snake.MoveDelay = 45;
             else if (snake.Score >= 3000) snake.MoveDelay = 60;
-            else if (snake.Score >= 1000) snake.MoveDelay = 80;
+            else if (snake.Score >= 1000) snake.MoveDelay = 70;
         }
 
         public Point GenerateStartPosition(int x, int y)

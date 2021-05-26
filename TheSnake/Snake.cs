@@ -28,7 +28,7 @@ namespace TheSnake
             SnakeExists = SnakeStartPosition;
             FacingDirection = SnakeFacingDirection.NOTHING;
             SnakeAlive = true;
-            MoveDelay = 100;
+            MoveDelay = 80;
             NextAppleValue = 10;
         }
 
