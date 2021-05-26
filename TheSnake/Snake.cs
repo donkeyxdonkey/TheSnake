@@ -15,6 +15,7 @@ namespace TheSnake
 
         public int SnakeLenght { get; set; }
         public Point[] SnakeExists { get; set; }
+        //public List<Point> SnakeExists { get; set; } V2 FIX
         public SnakeFacingDirection FacingDirection { get; set; }
         public bool SnakeAlive { get; set; }
         public int MoveDelay { get; set; }
@@ -29,7 +30,6 @@ namespace TheSnake
             SnakeAlive = true;
             MoveDelay = 100;
             NextAppleValue = 10;
-
         }
 
         public static Point[] NewSnake(int StartX, int StartY, int MaxSize)

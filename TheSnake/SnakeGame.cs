@@ -2,10 +2,13 @@
 using System.Drawing;
 using System.Threading;
 using System.Linq;
+using System.Collections.Generic;
+
+using Newtonsoft.Json;
+using System.IO;
 
 //using System.Diagnostics;
 //using System.Windows.Input;
-using System.Collections.Generic;
 //using System.Text;
 
 namespace TheSnake
@@ -31,6 +34,7 @@ namespace TheSnake
         {
             DrawBoard();
             DrawScoreBoard();
+            LoadHighScore();
             
             CurrentPosition = GenerateStartPosition(BoardX, BoardY);
 
@@ -47,12 +51,11 @@ namespace TheSnake
                 }                
                 MovingSnake(TheSnake);
                 TheSnake.SnakeAlive = false;
-                
-
-                
             }
+
             Console.WriteLine("GAME OVER!");
-            Console.ReadLine();
+            if (TheSnake.Score > TheScores.Min(score => score.Highscore)) NewHighScore(TheSnake);
+
             ReRun = true;
         }
 
@@ -82,10 +85,6 @@ namespace TheSnake
             if (Console.ForegroundColor != ConsoleColor.DarkGreen) Console.ForegroundColor = ConsoleColor.DarkGreen;
                         
             ConsoleKeyInfo keyInfo;
-            
-
-            //ReDrawSnake(snake);
-
             var HitTheSnake = false;
 
             while (TheBoard[CurrentPosition.Y][CurrentPosition.X] != 'X' && HitTheSnake == false)
@@ -129,14 +128,6 @@ namespace TheSnake
                 if (CurrentPosition == ApplePosition)
                 {
                     snake.SnakeLenght++;
-                    //if (snake.SnakeLenght >= 3) //funkar men behöver en list med applepositioner att jämföra med
-                    //{
-                    //    for (int i = 0; i < Rnd.Next(1,4); i++)
-                    //    {
-                    //        DrawApple(snake);
-                    //    }
-                    //}
-                    //else
                     DrawApple(snake);
                     Console.SetCursorPosition(LastPosition.X, LastPosition.Y);
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
@@ -220,8 +211,7 @@ namespace TheSnake
             if (snake.SnakeExists[snake.SnakeLenght - 1].X > 0 && snake.SnakeExists[snake.SnakeLenght - 1].Y > 0)
             {
                 Console.Write(SolidBlock);
-            }                
-
+            }
         }
 
         public void DrawApple(Snake snake)
@@ -269,10 +259,8 @@ namespace TheSnake
             for (int i = 0; i < BoardY; i++)
             {
                 Console.SetCursorPosition(BoardX, i);
-
                 for (int j = 0; j < ScoreBoardX; j++)
                 {
-
                     if (i == 0 || j == ScoreBoardX - 1 || i == BoardY - 1)
                     {
 
@@ -281,23 +269,16 @@ namespace TheSnake
                     }
                     else
                     {
-
                         Console.ForegroundColor = ConsoleColor.Black;
                         Console.Write(SolidBlock);
                     }
 
-                    if (j == ScoreBoardX - 1)
-                    {
-                        Console.WriteLine();                        
-                    }
-                    
+                    if (j == ScoreBoardX - 1) Console.WriteLine();
                 }
             }
-
             Console.SetCursorPosition(BoardX + (ScoreBoardX / 2) -6, 2);
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.Write("HIGHSCORES:");
-
         }
 
         private void DrawScore(Snake snake)
@@ -330,5 +311,77 @@ namespace TheSnake
             return new Point(startX, startY);
         }
 
+        //HIGHSCORE
+        public string HighscoresTXT = @"bestsnake.txt";
+        public List<HighScores> TheScores = new List<HighScores> { new HighScores{Name="DOLPH",Highscore=10000 },
+                                            new HighScores{Name="LUFFA",Highscore=6000 },
+                                            new HighScores{Name="ROLLE",Highscore=5050 },
+                                            new HighScores{Name="BENNY",Highscore=4440 },
+                                            new HighScores{Name="TEDDY",Highscore=3500 },
+                                            new HighScores{Name="RONNY",Highscore=3000 },
+                                            new HighScores{Name="RONNY",Highscore=1050 },
+                                            new HighScores{Name="LUCIF",Highscore=666 },
+                                            new HighScores{Name="ALPHA",Highscore=20 },
+                                            new HighScores{Name="ALPHA",Highscore=10 }
+                                           };
+
+        public void LoadHighScore()
+        {
+            if (File.Exists(HighscoresTXT)) TheScores = JsonConvert.DeserializeObject<List<HighScores>>(File.ReadAllText(HighscoresTXT));
+            else WriteHighScore(TheScores);
+            
+            var OffsetY = 0;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+
+            foreach (var highscore in TheScores)
+            {
+                Console.SetCursorPosition(BoardX + (ScoreBoardX / 2) - 9, 4 + OffsetY);
+                if (OffsetY < 9) Console.Write($"{OffsetY + 1}.  {highscore.Name} > {highscore.Highscore}");
+                else Console.Write($"{OffsetY + 1}. {highscore.Name} > {highscore.Highscore}");
+
+                OffsetY++;
+            }            
+
+        }
+
+        public void WriteHighScore(List<HighScores> highscores)
+        {
+            File.WriteAllText(HighscoresTXT, JsonConvert.SerializeObject(highscores));
+        }
+
+        public void NewHighScore(Snake snake)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.SetCursorPosition(15, 23);
+            Console.CursorVisible = true;
+
+            Console.Write("NEW HIGHSCORE! - ENTER NAME:>");
+
+            var NewName = "";
+            Console.ForegroundColor = ConsoleColor.White;
+
+            while (NewName.Length != 5)
+            {
+                Console.SetCursorPosition(45, 23);
+                for (int i = 0; i < NewName.Length; i++) Console.Write(' ');
+                
+                Console.SetCursorPosition(45, 23);
+                NewName = Console.ReadLine();
+
+                if (NewName.Length < 5 && NewName.Length > 0 && NewName.All(char.IsLetter))
+                {
+                    for (int j = NewName.Length; j < 5; j++)
+                    {
+                        NewName += ' ';
+                    }
+                }
+            }
+            TheScores.Remove(TheScores[9]);
+            TheScores.Add(new HighScores { Name = NewName.ToUpper(), Highscore = snake.Score });
+            TheScores = TheScores.OrderByDescending(sort => sort.Highscore).ToList();
+            WriteHighScore(TheScores);
+
+            Console.CursorVisible = false;
+        }
     }
 }

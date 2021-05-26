@@ -19,7 +19,6 @@ namespace TheSnake
                 SN.Run();
                 goto lurk;
             }
-
         }
     }
 }
